@@ -61,83 +61,85 @@ export default function PhotoRestoration() {
   }
 
   const handleRestore = async () => {
-    if (!selectedFile || selectedStyles.length === 0) return
+    if (!selectedFile || selectedStyles.length === 0) {
+      return;
+    }
 
-    setIsRestoring(true)
-    setProgress(0)
-    setCurrentProcessing("이미지 분석 중...")
-    setError(null) // 에러 상태 초기화
+    setIsRestoring(true);
+    setProgress(0);
+    setCurrentProcessing("이미지 분석 중...");
+    setError(null); // 에러 상태 초기화
 
     try {
-      const formData = new FormData()
-      formData.append("image", selectedFile)
-      formData.append("styles", JSON.stringify(selectedStyles))
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append("styles", JSON.stringify(selectedStyles));
 
       // Simulate progress
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
-          if (prev < 90) return prev + 10
-          return prev
-        })
-      }, 500)
+          if (prev < 90) return prev + 10;
+          return prev;
+        });
+      }, 500);
 
-      setCurrentProcessing("AI 복원 처리 중...")
+      setCurrentProcessing("AI 복원 처리 중...");
 
       const response = await fetch("/api/restore", {
         method: "POST",
         body: formData,
-      })
+      });
 
-      clearInterval(progressInterval)
-      setProgress(100)
+      clearInterval(progressInterval);
+      setProgress(100);
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success && result.restoredImages) {
-        setRestoredImages(result.restoredImages)
-        setCurrentProcessing("완료!")
+        setRestoredImages(result.restoredImages);
+        setCurrentProcessing("완료!");
 
         // 부분 성공인 경우 알림
         if (result.partialSuccess) {
           setTimeout(() => {
-            alert(`일부 스타일 복원에 실패했습니다.\n${result.message}`)
-          }, 1000)
+            alert(`일부 스타일 복원에 실패했습니다.\n${result.message}`);
+          }, 1000);
         }
 
         setTimeout(() => {
-          setCurrentProcessing("")
-        }, 1000)
+          setCurrentProcessing("");
+        }, 1000);
       } else {
-        console.error("Restoration failed:", result.error)
-        setCurrentProcessing("오류 발생")
+        console.error("Restoration failed:", result.error);
+        setCurrentProcessing("오류 발생");
 
         // 구체적인 에러 정보 설정
         setError({
           message: result.error || "알 수 없는 오류가 발생했습니다.",
           type: result.errorType,
           details: result.details,
-        })
+        });
       }
     } catch (error) {
-      console.error("Error:", error)
-      setCurrentProcessing("네트워크 오류")
+      console.error("Error:", error);
+      setCurrentProcessing("네트워크 오류");
 
       // 네트워크 에러 처리
       setError({
         message: "네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.",
         type: "NETWORK_ERROR",
         details: error instanceof Error ? error.message : "Network request failed",
-      })
+      });
     } finally {
-      setIsRestoring(false)
+      setIsRestoring(false);
       setTimeout(() => {
-        setProgress(0)
+        setProgress(0);
         if (!error) {
-          setCurrentProcessing("")
+          setCurrentProcessing("");
         }
-      }, 2000)
+      }, 2000);
     }
-  }
+  };
 
   const downloadImage = (imageData: string, style: string) => {
     const link = document.createElement("a")

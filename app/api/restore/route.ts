@@ -1,11 +1,12 @@
 import { GoogleGenAI, Modality } from "@google/genai"
+import { logger } from "@/lib/logger"
 
 export async function POST(req: Request) {
   try {
     // Check if API key exists
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
     if (!apiKey) {
-      console.error("Google Generative AI API key is missing")
+      logger.error("Google Generative AI API key is missing")
       return Response.json(
         {
           error: "서버 설정 오류가 발생했습니다. 관리자에게 문의해주세요.",
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     let selectedStyles: string[]
     try {
       selectedStyles = JSON.parse(stylesJson)
-    } catch {
+    } catch (e) {
       return Response.json(
         {
           error: "복원 스타일 정보가 올바르지 않습니다.",
@@ -70,14 +71,12 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer()
     const base64 = Buffer.from(bytes).toString("base64")
 
-    console.log(`Generating restored images with styles: ${selectedStyles.join(", ")}`)
-
     // Initialize Google Generative AI
     let ai
     try {
       ai = new GoogleGenAI({ apiKey })
     } catch (error) {
-      console.error("Failed to initialize Google AI:", error)
+      logger.error("Google AI 서비스 초기화 실패", { error })
       return Response.json(
         {
           error: "AI 서비스 초기화에 실패했습니다. 잠시 후 다시 시도해주세요.",
@@ -150,8 +149,6 @@ Generate the balanced hybrid restored image that perfectly combines vintage warm
           },
         ]
 
-        console.log(`Attempting to generate ${style} restoration...`)
-
         const response = await ai.models.generateContent({
           model: "gemini-2.0-flash-preview-image-generation",
           contents: contents,
@@ -160,101 +157,66 @@ Generate the balanced hybrid restored image that perfectly combines vintage warm
           },
         })
 
-        console.log(`Raw response for ${style}:`, JSON.stringify(response, null, 2))
-
         // Safely process the response with detailed logging
         let restoredImageData = null
         let responseText = ""
 
         // Check if response exists
         if (!response) {
-          console.error(`No response received for ${style}`)
+          logger.error(`'${style}' 스타일 AI 응답 없음`)
           throw new Error("No response received from AI service")
         }
 
-        console.log(`Response structure for ${style}:`, {
-          hasResponse: !!response,
-          responseKeys: Object.keys(response || {}),
-          hasCandidates: !!response?.candidates,
-          candidatesType: typeof response?.candidates,
-          candidatesLength: Array.isArray(response?.candidates) ? response.candidates.length : "not array",
-        })
-
         // Check candidates
         if (!response.candidates) {
-          console.error(`No candidates in response for ${style}`)
+          logger.error(`'${style}' 스타일 응답에 후보 없음`)
           throw new Error("No candidates in AI response")
         }
 
         if (!Array.isArray(response.candidates)) {
-          console.error(`Candidates is not an array for ${style}:`, typeof response.candidates)
+          logger.error(`'${style}' 스타일 후보가 배열이 아님`, { type: typeof response.candidates })
           throw new Error("Candidates is not an array")
         }
 
         if (response.candidates.length === 0) {
-          console.error(`Empty candidates array for ${style}`)
+          logger.error(`'${style}' 스타일 후보 배열이 비어 있음`)
           throw new Error("Empty candidates array")
         }
 
         const candidate = response.candidates[0]
-        console.log(`Candidate structure for ${style}:`, {
-          hasCandidate: !!candidate,
-          candidateKeys: candidate ? Object.keys(candidate) : "no candidate",
-          hasContent: !!candidate?.content,
-          contentType: typeof candidate?.content,
-          contentKeys: candidate?.content ? Object.keys(candidate.content) : "no content",
-        })
 
         if (!candidate) {
-          console.error(`First candidate is undefined for ${style}`)
+          logger.error(`'${style}' 스타일 첫 번째 후보가 정의되지 않음`)
           throw new Error("First candidate is undefined")
         }
 
         if (!candidate.content) {
-          console.error(`Candidate content is undefined for ${style}`)
-          console.log(`Full candidate object:`, JSON.stringify(candidate, null, 2))
+          logger.error(`'${style}' 스타일 후보 내용이 정의되지 않음`, { candidate: JSON.stringify(candidate, null, 2) })
           throw new Error("Candidate content is undefined")
         }
 
-        console.log(`Content structure for ${style}:`, {
-          hasContent: !!candidate.content,
-          hasParts: !!candidate.content.parts,
-          partsType: typeof candidate.content.parts,
-          partsLength: Array.isArray(candidate.content.parts) ? candidate.content.parts.length : "not array",
-        })
-
         if (!candidate.content.parts) {
-          console.error(`Candidate content parts is undefined for ${style}`)
+          logger.error(`'${style}' 스타일 후보 내용 부분이 정의되지 않음`)
           throw new Error("Candidate content parts is undefined")
         }
 
         if (!Array.isArray(candidate.content.parts)) {
-          console.error(`Candidate content parts is not an array for ${style}:`, typeof candidate.content.parts)
+          logger.error(`'${style}' 스타일 후보 내용 부분이 배열이 아님`, { type: typeof candidate.content.parts })
           throw new Error("Candidate content parts is not an array")
         }
 
         // Process each part safely
         for (let i = 0; i < candidate.content.parts.length; i++) {
           const part = candidate.content.parts[i]
-          console.log(`Processing part ${i} for ${style}:`, {
-            hasPart: !!part,
-            partKeys: part ? Object.keys(part) : "no part",
-            hasText: !!part?.text,
-            hasInlineData: !!part?.inlineData,
-            hasInlineDataData: !!part?.inlineData?.data,
-          })
 
           if (!part) {
-            console.warn(`Skipping undefined part ${i} in ${style} response`)
             continue
           }
 
           if (part.text) {
             responseText += part.text
-            console.log(`Found text in part ${i} for ${style}:`, part.text.substring(0, 100))
           } else if (part.inlineData && part.inlineData.data) {
             restoredImageData = part.inlineData.data
-            console.log(`Found image data in part ${i} for ${style}, length:`, part.inlineData.data.length)
           }
         }
 
@@ -265,14 +227,12 @@ Generate the balanced hybrid restored image that perfectly combines vintage warm
             style: style,
             description: responseText || `${style} 스타일로 복원된 이미지`,
           })
-          console.log(`${style} restoration completed successfully`)
         } else {
           failedStyles.push(style)
-          console.error(`No image data received for ${style} style`)
+          logger.error(`'${style}' 스타일 이미지 데이터 수신 실패`)
         }
       } catch (error) {
-        console.error(`Error generating ${style} restoration:`, error)
-        console.error(`Error stack:`, error instanceof Error ? error.stack : "No stack trace")
+        logger.error(`'${style}' 스타일 복원 중 오류 발생`, { error, stack: error instanceof Error ? error.stack : "No stack trace" })
         failedStyles.push(style)
 
         // Check for specific API errors
@@ -317,15 +277,12 @@ Generate the balanced hybrid restored image that perfectly combines vintage warm
             )
           }
         }
-
-        // Continue with other styles even if one fails
-        console.log(`Continuing with remaining styles after ${style} failed`)
       }
     }
 
     // If all styles failed, provide a more helpful error message
     if (restorationResults.length === 0) {
-      console.error("All restoration attempts failed")
+      logger.error("모든 복원 시도 실패", { failedStyles })
 
       // Check if it's likely an API issue
       if (failedStyles.length === selectedStyles.length) {
@@ -395,7 +352,10 @@ Generate the balanced hybrid restored image that perfectly combines vintage warm
       message = `${styleNames} 스타일로 복원이 완료되었습니다!`
     }
 
-    console.log(`Generated ${restorationResults.length} restoration(s)`)
+    logger.info(`총 ${restorationResults.length}개의 복원 이미지 생성 완료`, {
+      successfulStyles: restorationResults.map((r) => r.style),
+      failedStyles: failedStyles,
+    })
 
     return Response.json({
       success: true,
@@ -405,8 +365,7 @@ Generate the balanced hybrid restored image that perfectly combines vintage warm
       failedStyles: failedStyles,
     })
   } catch (error) {
-    console.error("Error restoring image:", error)
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace")
+    logger.error("이미지 복원 중 예기치 않은 오류 발생", { error, stack: error instanceof Error ? error.stack : "No stack trace" })
 
     // Handle network errors
     if (error instanceof TypeError && error.message.includes("fetch")) {
