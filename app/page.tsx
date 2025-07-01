@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { Wand2, Download, Expand, Check, Info, Palette, Clock, Sparkles, HelpCircle } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Wand2, Download, Expand, Check, Info, Palette, Clock, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ImageModal } from "@/components/image-modal"
 import { DragDropUpload } from "@/components/drag-drop-upload"
@@ -32,11 +32,44 @@ export default function PhotoRestoration() {
     details?: string
   } | null>(null)
 
+  // 애니메이션 상태 추가
+  const [animationIndex, setAnimationIndex] = useState(0)
+  const [isVisible, setIsVisible] = useState(true)
+
   const originalImageRef = useRef<HTMLDivElement>(null);
 
   // Modal states
   const [isOriginalModalOpen, setIsOriginalModalOpen] = useState(false)
   const [selectedRestoredIndex, setSelectedRestoredIndex] = useState<number | null>(null)
+
+  // 복원 전후 이미지 갤러리
+  const beforeAfterImages = [
+    {
+      before: "/before_after/before_1.jpg",
+      after: "/before_after/after_1.png"
+    },
+    {
+      before: "/before_after/before_2.jpg",
+      after: "/before_after/after_2.png"
+    },
+    {
+      before: "/before_after/before_3.jpg",
+      after: "/before_after/after_3.png"
+    },
+  ]
+
+  // 애니메이션 효과 (페이드인/페이드아웃)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsVisible(false)
+      setTimeout(() => {
+        setAnimationIndex((prev) => (prev + 1) % beforeAfterImages.length)
+        setIsVisible(true)
+      }, 1000)
+    }, 4500)
+
+    return () => clearInterval(interval)
+  }, [beforeAfterImages.length])
 
   const handleFileSelected = (file: File) => {
     setSelectedFile(file)
@@ -226,7 +259,7 @@ export default function PhotoRestoration() {
       <main className="container mx-auto px-4 py-6 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Hero Section */}
-          <div className="text-center py-8">
+          <div className="text-center pt-8">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 px-3 py-1.5 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 mb-4 backdrop-blur-sm border border-blue-200/50 dark:border-blue-700/50">
               <Sparkles className="w-3 h-3" />
               AI 기반 사진 복원 서비스
@@ -242,8 +275,57 @@ export default function PhotoRestoration() {
             </p>
           </div>
 
+          {/* Before & After Gallery */}
+          <div className="flex items-center justify-center relative h-[400px] pb-20">
+            {beforeAfterImages.map((image, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out ${index === animationIndex && isVisible
+                  ? "opacity-100 transform translate-y-0"
+                  : "opacity-0 transform translate-y-8"
+                  }`}
+              >
+                <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+                  {/* Before Image */}
+                  <div className="space-y-3">
+                    <div className="text-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium rounded-full">
+                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                        복원 전
+                      </span>
+                    </div>
+                    <div className="overflow-hidden rounded-lg">
+                      <img
+                        src={image.before}
+                        alt="Before restoration"
+                        className="w-full h-auto max-h-64 object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  {/* After Image */}
+                  <div className="space-y-3">
+                    <div className="text-center">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-full">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        복원 후
+                      </span>
+                    </div>
+                    <div className="overflow-hidden rounded-lg">
+                      <img
+                        src={image.after}
+                        alt="After restoration"
+                        className="w-full h-auto max-h-64 object-contain"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Upload Section */}
-          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 !mt-10">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-sm">1</span>
