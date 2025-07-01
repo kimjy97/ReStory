@@ -15,7 +15,7 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-600 bg-clip-text text-transparent">
                 ReStory
               </h3>
             </div>

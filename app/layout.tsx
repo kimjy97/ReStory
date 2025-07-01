@@ -3,8 +3,18 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
+import { PWAInstaller } from "@/components/pwa-installer"
+import { Footer } from "@/components/footer"
 
 const inter = Inter({ subsets: ["latin"] })
+
+export const viewport = {
+  themeColor: "#2563eb",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "무료 사진 복원 서비스 - AI로 옛날 사진 복원",
@@ -12,8 +22,6 @@ export const metadata: Metadata = {
   keywords: ["무료사진복원", "사진복원", "AI", "이미지복원", "옛날사진", "사진수리"],
   authors: [{ name: "Photo Restoration Service" }],
   manifest: "/manifest.json",
-  themeColor: "#2563eb",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -45,7 +53,11 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900/20 relative overflow-hidden">
+            <PWAInstaller />
+            {children}
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>

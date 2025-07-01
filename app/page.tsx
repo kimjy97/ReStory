@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { Wand2, Download, Expand, Check, Info, Palette, Clock, Sparkles, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { PWAInstaller } from "@/components/pwa-installer"
 import { ImageModal } from "@/components/image-modal"
 import { DragDropUpload } from "@/components/drag-drop-upload"
-import { Footer } from "@/components/footer"
 import { ErrorDialog } from "@/components/error-dialog"
+import { Header } from "@/components/main-haeder"
 
 interface RestoredImage {
   data: string
@@ -214,9 +213,7 @@ export default function PhotoRestoration() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900/20 relative overflow-hidden">
-      <PWAInstaller />
-
+    <div>
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
@@ -224,21 +221,7 @@ export default function PhotoRestoration() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 bg-white/80 dark:bg-black/30 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg">
-        <div className="container mx-auto px-4 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">R</span>
-              </div>
-              <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                ReStory
-              </h3>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-6 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -489,8 +472,6 @@ export default function PhotoRestoration() {
           )}
         </div>
       </main>
-
-      <Footer />
 
       {/* Modals */}
       {originalImage && (
