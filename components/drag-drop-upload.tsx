@@ -1,5 +1,5 @@
 "use client"
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react"
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react"
 import { Upload, ImageIcon, Camera, Sparkles } from "lucide-react"
 
 interface DragDropUploadProps {
@@ -10,6 +10,19 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragError, setDragError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 헤더 버튼에서 커스텀 이벤트로 업로드 input 트리거
+  useEffect(() => {
+    const handleOpenUploadInput = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    };
+    window.addEventListener("open-upload-input", handleOpenUploadInput);
+    return () => {
+      window.removeEventListener("open-upload-input", handleOpenUploadInput);
+    };
+  }, []);
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -65,13 +78,12 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
 
   return (
     <div
-      className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300 relative ${
-        isDragging
+      className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300 relative ${isDragging
           ? "border-blue-500 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 shadow-2xl scale-105 transform"
           : dragError
             ? "border-red-500 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/30 shadow-xl"
             : "border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-purple-50/50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 hover:scale-102 transform"
-      }`}
+        }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -82,13 +94,12 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
       <div className="space-y-4 relative z-10">
         <div className="mx-auto w-16 h-16 relative flex items-center justify-center">
           <div
-            className={`w-full h-full rounded-xl flex items-center justify-center transition-all duration-300 shadow-lg relative ${
-              isDragging
+            className={`w-full h-full rounded-xl flex items-center justify-center transition-all duration-300 shadow-lg relative ${isDragging
                 ? "bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-2xl scale-110 rotate-3"
                 : dragError
                   ? "bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-xl"
                   : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 text-gray-600 dark:text-gray-300 group-hover:from-blue-100 group-hover:to-purple-100 dark:group-hover:from-blue-800 dark:group-hover:to-purple-800 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:scale-105"
-            }`}
+              }`}
           >
             {dragError ? (
               <ImageIcon className="w-8 h-8" />

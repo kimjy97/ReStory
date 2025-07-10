@@ -173,7 +173,7 @@ export default function TermsOfService() {
           {/* 하단 연락처 */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 mt-8 border border-blue-200/50 dark:border-blue-700/50">
             <div className="text-center">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">궁금한 점이 있으신���요?</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">궁금한 점이 있으신가요?</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 서비스 이용에 관한 문의사항이 있으시면 언제든지 연락해 주세요.
               </p>
