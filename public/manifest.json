@@ -9,31 +9,17 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
+      "src": "/favicon_196.png",
+      "sizes": "196x196",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/favicon_512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
     }
   ],
-  "categories": ["photo", "utilities"],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ]
+  "categories": ["photo", "utilities"]
 }
