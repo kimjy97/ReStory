@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Wand2, Download, Expand, Check, Info, Palette, Clock, Sparkles } from "lucide-react"
+import { Wand2, Download, RefreshCw, CheckCircle2, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ImageModal } from "@/components/image-modal"
 import { DragDropUpload } from "@/components/drag-drop-upload"
 import { ErrorDialog } from "@/components/error-dialog"
 import { Header } from "@/components/main-haeder"
+import { BeforeAfterSlider } from "@/components/before-after-slider"
 
 interface RestoredImage {
   data: string
@@ -15,571 +15,324 @@ interface RestoredImage {
   description: string
 }
 
-type RestorationStyle = "conservative" | "modern" | "balanced"
-
 export default function PhotoRestoration() {
   const [originalImage, setOriginalImage] = useState<string | null>(null)
-  const [restoredImages, setRestoredImages] = useState<RestoredImage[]>([])
+  const [restoredImage, setRestoredImage] = useState<RestoredImage | null>(null)
   const [isRestoring, setIsRestoring] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [selectedStyles, setSelectedStyles] = useState<RestorationStyle[]>(["modern"])
   const [progress, setProgress] = useState(0)
-  const [currentProcessing, setCurrentProcessing] = useState<string>("")
-  const [showTooltip, setShowTooltip] = useState<string | null>(null)
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1)
   const [error, setError] = useState<{
     message: string
     type?: string
     details?: string
   } | null>(null)
 
-  // 애니메이션 상태 추가
-  const [animationIndex, setAnimationIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
+  const originalImageRef = useRef<HTMLDivElement>(null)
 
-  const originalImageRef = useRef<HTMLDivElement>(null);
-
-  // Modal states
-  const [isOriginalModalOpen, setIsOriginalModalOpen] = useState(false)
-  const [selectedRestoredIndex, setSelectedRestoredIndex] = useState<number | null>(null)
-
-  // 복원 전후 이미지 갤러리
-  const beforeAfterImages = [
-    {
-      before: "/before_after/before_1.jpg",
-      after: "/before_after/after_1.png"
-    },
-    {
-      before: "/before_after/before_2.jpg",
-      after: "/before_after/after_2.png"
-    },
-    {
-      before: "/before_after/before_3.jpg",
-      after: "/before_after/after_3.png"
-    },
+  const restorationSteps = [
+    "이미지 해상도 및 화학적 훼손 상태 분석 중...",
+    "물리적 먼지, 잔기스 및 지문 스크래치 정밀 검출 중...",
+    "손실된 픽셀 캔버스 영역 미세 보간 매핑 중...",
+    "Cloudflare Workers AI 디퓨전(SDXL) 컬러 복원 중...",
+    "복원 완료! 노이즈 제거 및 선명도 향상 합성 중...",
   ]
 
-  // 애니메이션 효과 (페이드인/페이드아웃)
+  // Simulate step-by-step restoration log progress
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible(false)
-      setTimeout(() => {
-        setAnimationIndex((prev) => (prev + 1) % beforeAfterImages.length)
-        setIsVisible(true)
-      }, 1000)
-    }, 4500)
+    let interval: NodeJS.Timeout
+    if (isRestoring) {
+      setCurrentStepIndex(0)
+      setProgress(5)
+      
+      interval = setInterval(() => {
+        setCurrentStepIndex((prev) => {
+          if (prev < restorationSteps.length - 1) {
+            const nextStep = prev + 1
+            setProgress(Math.floor((nextStep / restorationSteps.length) * 100))
+            return nextStep
+          }
+          setProgress(95)
+          return prev
+        })
+      }, 2500)
+    } else {
+      setCurrentStepIndex(-1)
+      setProgress(0)
+    }
 
-    return () => clearInterval(interval)
-  }, [beforeAfterImages.length])
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isRestoring])
 
   const handleFileSelected = (file: File) => {
     setSelectedFile(file)
     const reader = new FileReader()
     reader.onload = (e) => {
       setOriginalImage(e.target?.result as string)
-      setRestoredImages([])
+      setRestoredImage(null)
       setProgress(0)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleStyleToggle = (style: RestorationStyle) => {
-    setSelectedStyles((prev) => {
-      if (prev.includes(style)) {
-        return prev.filter((s) => s !== style)
-      } else {
-        return [...prev, style]
-      }
-    })
-  }
-
   const handleRestore = async () => {
-    if (!selectedFile || selectedStyles.length === 0) {
-      return;
-    }
+    if (!selectedFile) return
 
-    setIsRestoring(true);
-    setProgress(0);
-    setCurrentProcessing("이미지 분석 중...");
-    setError(null); // 에러 상태 초기화
+    setIsRestoring(true)
+    setError(null)
 
     try {
-      const formData = new FormData();
-      formData.append("image", selectedFile);
-      formData.append("styles", JSON.stringify(selectedStyles));
-
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev < 90) return prev + 10;
-          return prev;
-        });
-      }, 500);
-
-      setCurrentProcessing("AI 복원 처리 중...");
+      const formData = new FormData()
+      formData.append("image", selectedFile)
 
       const response = await fetch("/api/restore", {
         method: "POST",
         body: formData,
-      });
+      })
 
-      clearInterval(progressInterval);
-      setProgress(100);
+      const result = await response.json()
 
-      const result = await response.json();
-
-      if (result.success && result.restoredImages) {
-        setRestoredImages(result.restoredImages);
-        setCurrentProcessing("완료!");
-
-        // 부분 성공인 경우 알림
-        if (result.partialSuccess) {
-          setTimeout(() => {
-            alert(`일부 스타일 복원에 실패했습니다.\n${result.message}`);
-          }, 1000);
-        }
-
-        setTimeout(() => {
-          setCurrentProcessing("");
-        }, 1000);
+      if (result.success && result.restoredImages && result.restoredImages.length > 0) {
+        setRestoredImage(result.restoredImages[0])
+        setProgress(100)
       } else {
-        console.error("Restoration failed:", result.error);
-        setCurrentProcessing("오류 발생");
-
-        // 구체적인 에러 정보 설정
+        console.error("Restoration failed:", result.error)
         setError({
-          message: result.error || "알 수 없는 오류가 발생했습니다.",
+          message: result.error || "복원 작업에 실패했습니다. 이미지를 다시 확인하고 시도해주세요.",
           type: result.errorType,
           details: result.details,
-        });
+        })
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setCurrentProcessing("네트워크 오류");
-
-      // 네트워크 에러 처리
+    } catch (err) {
+      console.error("Error:", err)
       setError({
-        message: "네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인하고 다시 시도해주세요.",
+        message: "네트워크 연결에 문제가 있습니다. 인터넷 상태를 확인하고 다시 시도해주세요.",
         type: "NETWORK_ERROR",
-        details: error instanceof Error ? error.message : "Network request failed",
-      });
+        details: err instanceof Error ? err.message : "Network request failed",
+      })
     } finally {
-      setIsRestoring(false);
-      setTimeout(() => {
-        setProgress(0);
-        if (!error) {
-          setCurrentProcessing("");
-        }
-      }, 2000);
+      setIsRestoring(false)
     }
-  };
+  }
 
-  const downloadImage = (imageData: string, style: string) => {
+  const downloadImage = () => {
+    if (!restoredImage) return
     const link = document.createElement("a")
-    link.href = `data:image/png;base64,${imageData}`
-    link.download = `restory-${style}-${Date.now()}.png`
+    link.href = `data:${restoredImage.mimeType};base64,${restoredImage.data}`
+    link.download = `restory-${Date.now()}.png`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
 
-  const downloadAllImages = () => {
-    restoredImages.forEach((image, index) => {
-      setTimeout(() => {
-        downloadImage(image.data, image.style)
-      }, index * 500)
-    })
-  }
-
-  const getStyleInfo = (style: RestorationStyle) => {
-    switch (style) {
-      case "conservative":
-        return {
-          name: "빈티지 보존",
-          description: "원본의 따뜻한 느낌을 유지하며 자연스럽게 복원",
-          icon: Clock,
-          gradient: "from-amber-500 to-orange-600",
-          bgGradient: "from-amber-50 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30",
-          borderColor: "border-amber-400",
-          textColor: "text-amber-700 dark:text-amber-300",
-          iconBg: "bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-800 dark:to-orange-800",
-        }
-      case "modern":
-        return {
-          name: "모던 향상",
-          description: "현대적 색감으로 선명하고 밝게 향상",
-          icon: Sparkles,
-          gradient: "from-blue-500 to-cyan-600",
-          bgGradient: "from-blue-50 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30",
-          borderColor: "border-blue-400",
-          textColor: "text-blue-700 dark:text-blue-300",
-          iconBg: "bg-gradient-to-br from-blue-100 to-cyan-200 dark:from-blue-800 dark:to-cyan-800",
-        }
-      case "balanced":
-        return {
-          name: "하이브리드",
-          description: "빈티지의 따뜻함과 모던의 선명함을 조화롭게 결합",
-          icon: Palette,
-          gradient: "from-purple-500 to-pink-600",
-          bgGradient: "from-purple-50 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30",
-          borderColor: "border-purple-400",
-          textColor: "text-purple-700 dark:text-purple-300",
-          iconBg: "bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-800 dark:to-pink-800",
-        }
-      default:
-        return {
-          name: style,
-          description: "",
-          icon: Palette,
-          gradient: "from-gray-500 to-gray-600",
-          bgGradient: "from-gray-50 to-gray-100",
-          borderColor: "border-gray-400",
-          textColor: "text-gray-700",
-          iconBg: "bg-gray-100",
-        }
-    }
-  }
-
-  const getButtonText = () => {
-    if (selectedStyles.length === 0) return "스타일을 선택해주세요"
-    if (selectedStyles.length === 1) return `${getStyleInfo(selectedStyles[0]).name}로 복원`
-    return `${selectedStyles.length}가지 스타일로 복원`
+  const handleReset = () => {
+    setOriginalImage(null)
+    setRestoredImage(null)
+    setSelectedFile(null)
+    setProgress(0)
+    setCurrentStepIndex(-1)
   }
 
   return (
-    <div>
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
-
+    <div className="relative">
       <Header />
 
-      <main className="container mx-auto px-4 py-6 pb-16 relative z-10">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Hero Section */}
-          <div className="text-center pt-8">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 px-3 py-1.5 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 mb-4 backdrop-blur-sm border border-blue-200/50 dark:border-blue-700/50">
-              <Sparkles className="w-3 h-3" />
-              AI 기반 사진 복원 서비스
+      <main className="container mx-auto px-4 py-10 max-w-4xl relative z-10 select-none">
+        {/* Flat Minimal Hero Section */}
+        <div className="text-center py-6 border-b border-border mb-10">
+          <h2 className="text-3xl font-black tracking-tight text-foreground uppercase mb-2">
+            AI DIGITAL HERITAGE PRESERVATION
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto font-medium">
+            첨단 Cloudflare Workers AI 모델을 이용해 훼손된 아날로그 옛날 사진에서 스크래치, 잡음 및 변색을 정밀 복원합니다.
+          </p>
+        </div>
+
+        <div className="space-y-8">
+          {/* 1. Upload View */}
+          {!originalImage && (
+            <div className="bg-card border border-border rounded p-6">
+              <h3 className="text-sm font-bold text-foreground uppercase mb-4 tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                STEP 1. 원본 사진 아카이브
+              </h3>
+              <DragDropUpload onFileSelected={handleFileSelected} />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent mb-4 leading-tight">
-              오래된 사진을 새롭게
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto leading-relaxed">
-              첨단 AI 기술로 손상된 사진을 <span className="text-transparent bg-gradient-to-r from-green-500 to-teal-500 bg-clip-text font-semibold">무료로</span> 복원하고 <br />
-              <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-semibold">
-                소중한 추억을 되살려보세요
-              </span>
-            </p>
-          </div>
+          )}
 
-          {/* Before & After Gallery */}
-          <div className="flex items-center justify-center relative h-[400px] pb-20">
-            {beforeAfterImages.map((image, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-out ${index === animationIndex && isVisible
-                  ? "opacity-100 transform translate-y-0"
-                  : "opacity-0 transform translate-y-8"
-                  }`}
-              >
-                <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
-                  {/* Before Image */}
-                  <div className="space-y-3">
-                    <div className="text-center">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium rounded-full">
-                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                        복원 전
-                      </span>
-                    </div>
-                    <div className="overflow-hidden rounded-lg">
-                      <img
-                        src={image.before}
-                        alt="Before restoration"
-                        className="w-full h-auto max-h-64 object-contain"
-                      />
-                    </div>
-                  </div>
-
-                  {/* After Image */}
-                  <div className="space-y-3">
-                    <div className="text-center">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium rounded-full">
-                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                        복원 후
-                      </span>
-                    </div>
-                    <div className="overflow-hidden rounded-lg">
-                      <img
-                        src={image.after}
-                        alt="After restoration"
-                        className="w-full h-auto max-h-64 object-contain"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Upload Section */}
-          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 !mt-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">1</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">사진 업로드</h3>
-              <button
-                onMouseEnter={() => setShowTooltip("upload")}
-                onMouseLeave={() => setShowTooltip(null)}
-                className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
-              >
-                <Info className="w-4 h-4" />
-              </button>
-              {showTooltip === "upload" && (
-                <div className="absolute z-10 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg px-2 py-1 -top-8 left-0 shadow-xl whitespace-nowrap">
-                  JPG, PNG 파일 지원 (최대 10MB)
-                </div>
-              )}
-            </div>
-            <DragDropUpload onFileSelected={handleFileSelected} />
-          </div>
-
-          {/* Original Image */}
-          {originalImage && (
-            <div
-              ref={originalImageRef}
-              className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 animate-in slide-in-from-bottom-4"
-            >
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">원본 사진</h3>
-              <div className="max-w-sm mx-auto">
-                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden border-2 border-white dark:border-gray-600">
+          {/* 2. Restoration Console View */}
+          {originalImage && !restoredImage && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              {/* Original Preview */}
+              <div className="bg-card border border-border rounded p-6 space-y-4">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                  분석 대상 원본
+                </h3>
+                <div className="aspect-square bg-muted rounded border border-border overflow-hidden">
                   <img
-                    src={originalImage || "/placeholder.svg"}
-                    alt="Original"
-                    className="w-full h-full object-contain hover:scale-105 transition-transform duration-300 cursor-pointer"
-                    onClick={() => setIsOriginalModalOpen(true)}
-                    onLoad={() => originalImageRef.current?.scrollIntoView({ behavior: "smooth" })}
+                    src={originalImage}
+                    alt="Original Uploaded"
+                    className="w-full h-full object-contain"
                   />
                 </div>
-                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-3 font-medium">
-                  클릭하여 크게 보기
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Style Selection */}
-          {originalImage && (
-            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 animate-in slide-in-from-bottom-4">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-sm">2</span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">복원 스타일 선택</h3>
-                <button
-                  onMouseEnter={() => setShowTooltip("styles")}
-                  onMouseLeave={() => setShowTooltip(null)}
-                  className="text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors duration-200"
-                >
-                  <Info className="w-4 h-4" />
-                </button>
-                {showTooltip === "styles" && (
-                  <div className="absolute z-10 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg px-2 py-1 -top-8 left-0 shadow-xl max-w-xs whitespace-nowrap">
-                    여러 스타일을 선택하여 결과를 비교해보세요
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(["conservative", "balanced", "modern"] as RestorationStyle[]).map((style) => {
-                  const styleInfo = getStyleInfo(style)
-                  const IconComponent = styleInfo.icon
-                  const isSelected = selectedStyles.includes(style)
-
-                  return (
-                    <div
-                      key={style}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg relative overflow-hidden ${isSelected
-                        ? `${styleInfo.borderColor} bg-gradient-to-br ${styleInfo.bgGradient} shadow-xl scale-105`
-                        : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white/50 dark:bg-gray-700/50"
-                        }`}
-                      onClick={() => handleStyleToggle(style)}
-                    >
-                      {isSelected && (
-                        <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-gradient-to-r from-blue-400 to-purple-500"></div>
-                      )}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`p-2 rounded-lg ${styleInfo.iconBg} shadow-md`}>
-                            <IconComponent className={`w-4 h-4 ${styleInfo.textColor}`} />
-                          </div>
-                          <h4 className="font-bold text-base text-gray-900 dark:text-white">{styleInfo.name}</h4>
-                        </div>
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isSelected
-                            ? `bg-gradient-to-br ${styleInfo.gradient} border-transparent shadow-lg`
-                            : "border-gray-300 dark:border-gray-600 hover:border-gray-400"
-                            }`}
-                        >
-                          {isSelected && <Check className="w-3 h-3 text-white" />}
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                        {styleInfo.description}
-                      </p>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Progress Bar */}
-              {isRestoring && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50 backdrop-blur-sm">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">{currentProcessing}</span>
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">{progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden shadow-inner">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500 shadow-lg relative overflow-hidden"
-                      style={{ width: `${progress}%` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <Button
-                onClick={handleRestore}
-                disabled={!originalImage || isRestoring || selectedStyles.length === 0}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold text-base py-3 rounded-lg shadow-xl border-0 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isRestoring ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    AI가 마법을 부리는 중...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-4 h-4 mr-2" />
-                    {getButtonText()}
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-
-          {/* Results */}
-          {restoredImages.length > 0 && (
-            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 animate-in slide-in-from-bottom-4">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-sm">3</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">복원 결과</h3>
-                </div>
-                {restoredImages.length > 1 && (
+                {!isRestoring && (
                   <Button
                     variant="outline"
-                    size="sm"
-                    onClick={downloadAllImages}
-                    className="bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border-gray-200/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-200"
+                    onClick={handleReset}
+                    className="w-full border-border hover:bg-accent text-xs font-bold rounded shadow-none"
                   >
-                    <Download className="w-3 h-3 mr-1" />
-                    전체 다운로드
+                    사진 교체하기
                   </Button>
                 )}
               </div>
 
-              <div
-                className={`grid gap-6 ${restoredImages.length === 1
-                  ? "max-w-sm mx-auto"
-                  : restoredImages.length === 2
-                    ? "grid-cols-1 sm:grid-cols-2"
-                    : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                  }`}
-              >
-                {restoredImages.map((restoredImage, index) => {
-                  const styleInfo = getStyleInfo(restoredImage.style as RestorationStyle)
-                  const IconComponent = styleInfo.icon
+              {/* Processing Console */}
+              <div className="bg-card border border-border rounded p-6 space-y-6">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                  복원 컨트롤 패널
+                </h3>
 
-                  return (
-                    <div key={index} className="space-y-3">
-                      <div className="flex items-center gap-2 justify-center">
-                        <div className={`p-1.5 rounded-lg ${styleInfo.iconBg} shadow-md`}>
-                          <IconComponent className={`w-4 h-4 ${styleInfo.textColor}`} />
-                        </div>
-                        <h4 className="font-bold text-base text-gray-900 dark:text-white">{styleInfo.name}</h4>
+                {isRestoring ? (
+                  <div className="space-y-4">
+                    {/* Flat simulated checklist log */}
+                    <div className="border border-border rounded bg-muted p-4 space-y-2.5 font-mono text-[11px] leading-relaxed">
+                      {restorationSteps.map((step, idx) => {
+                        const isDone = idx < currentStepIndex
+                        const isCurrent = idx === currentStepIndex
+                        
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex items-center gap-2 ${
+                              isDone
+                                ? "text-primary font-semibold"
+                                : isCurrent
+                                ? "text-foreground font-bold animate-pulse"
+                                : "text-muted-foreground/50"
+                            }`}
+                          >
+                            {isDone ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+                            )}
+                            <span>{step}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Simple flat loading indicator */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-bold text-muted-foreground font-mono">
+                        <span>PRESERVING WORK...</span>
+                        <span>{progress}%</span>
                       </div>
-                      <div
-                        className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 border-2 border-white dark:border-gray-600"
-                        onClick={() => setSelectedRestoredIndex(index)}
-                      >
-                        <img
-                          src={`data:${restoredImage.mimeType};base64,${restoredImage.data}`}
-                          alt={`Restored ${restoredImage.style}`}
-                          className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+                      <div className="w-full bg-secondary border border-border rounded-sm h-2 overflow-hidden">
+                        <div
+                          className="bg-primary h-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
                         />
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedRestoredIndex(index)}
-                          className="flex-none px-2 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border-gray-200/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-200"
-                        >
-                          <Expand className="w-3 h-3 mr-1" />
-                          보기
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => downloadImage(restoredImage.data, restoredImage.style)}
-                          className="flex-1 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border-gray-200/50 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-200"
-                        >
-                          <Download className="w-3 h-3 mr-1" />
-                          다운로드
-                        </Button>
-                      </div>
                     </div>
-                  )
-                })}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted border border-border rounded text-xs text-muted-foreground leading-relaxed">
+                      <p className="font-bold text-foreground uppercase mb-1 flex items-center gap-1.5">
+                        <span className="w-1 h-1 bg-primary rounded-full"></span>
+                        AI RESTORATION CONFIG
+                      </p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li>엔진: Cloudflare Workers AI Model</li>
+                        <li>아키텍처: Stable Diffusion v1.5 Img2Img</li>
+                        <li>복원 방법: 물리 손상 복구, 이염 복제, 고해상 채색</li>
+                      </ul>
+                    </div>
+
+                    <Button
+                      onClick={handleRestore}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/95 font-bold py-3 rounded shadow-none border-0 transition-colors"
+                    >
+                      <Wand2 className="w-4 h-4 mr-2" />
+                      디지털 복원 시작하기
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Success Results View */}
+          {originalImage && restoredImage && (
+            <div className="bg-card border border-border rounded p-6 space-y-6 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4 gap-4">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                  STEP 3. 아카이브 복원 결과 플레이트
+                </h3>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReset}
+                    className="border-border hover:bg-accent text-xs font-bold rounded shadow-none flex items-center gap-1"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    새 사진 복원하기
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={downloadImage}
+                    className="bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-bold rounded shadow-none flex items-center gap-1"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    결과 고화질 다운로드
+                  </Button>
+                </div>
+              </div>
+
+              {/* High-fidelity interactive flat slider */}
+              <div className="max-w-2xl mx-auto">
+                <BeforeAfterSlider
+                  originalSrc={originalImage}
+                  restoredSrc={`data:${restoredImage.mimeType};base64,${restoredImage.data}`}
+                  className="border border-border rounded"
+                />
+                <p className="text-center text-xs text-muted-foreground mt-3 font-semibold uppercase">
+                  슬라이더를 좌우로 드래그하여 상세 복원 디테일을 비교하세요
+                </p>
+              </div>
+
+              {/* Flat Technical Plate Card */}
+              <div className="max-w-2xl mx-auto p-4 bg-muted border border-border rounded grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-muted-foreground">RESTORATION SYSTEM:</span>{" "}
+                  <span className="text-foreground font-bold">CLOUDFLARE WORKERS AI</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">ALGORITHM ENGINE:</span>{" "}
+                  <span className="text-foreground font-bold">SD v1.5 (IMG2IMG)</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">OUTPUT RESOLUTION:</span>{" "}
+                  <span className="text-foreground font-bold">1024 X 1024 PIXELS</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">STATUS STATE:</span>{" "}
+                  <span className="text-primary font-bold">ARCHIVAL SUCCESSFUL</span>
+                </div>
               </div>
             </div>
           )}
         </div>
       </main>
 
-      {/* Modals */}
-      {originalImage && (
-        <ImageModal
-          isOpen={isOriginalModalOpen}
-          onClose={() => setIsOriginalModalOpen(false)}
-          imageSrc={originalImage}
-          imageAlt="원본 사진"
-          title="원본 사진"
-        />
-      )}
-
-      {selectedRestoredIndex !== null && restoredImages[selectedRestoredIndex] && (
-        <ImageModal
-          isOpen={selectedRestoredIndex !== null}
-          onClose={() => setSelectedRestoredIndex(null)}
-          imageSrc={`data:${restoredImages[selectedRestoredIndex].mimeType};base64,${restoredImages[selectedRestoredIndex].data}`}
-          imageAlt={`복원된 사진 - ${getStyleInfo(restoredImages[selectedRestoredIndex].style as RestorationStyle).name}`}
-          title={`복원된 사진 - ${getStyleInfo(restoredImages[selectedRestoredIndex].style as RestorationStyle).name}`}
-          showDownload={true}
-          onDownload={() =>
-            downloadImage(restoredImages[selectedRestoredIndex].data, restoredImages[selectedRestoredIndex].style)
-          }
-        />
-      )}
-      {/* Error Dialog */}
+      {/* Error dialog */}
       {error && (
         <ErrorDialog
           isOpen={!!error}

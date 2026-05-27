@@ -19,8 +19,6 @@ export const metadata: Metadata = {
   title: "무료 사진 복원 서비스 - AI로 옛날 사진 복원",
   description: "AI 기술로 손상된 옛날 사진을 무료로 전문적으로 복원해드립니다",
   keywords: ["무료사진복원", "사진복원", "AI", "이미지복원", "옛날사진", "사진수리"],
-  authors: [{ name: "Photo Restoration Service" }],
-  themeColor: '#2563eb',
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -54,8 +52,10 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900/20 relative overflow-hidden">
-            {children}
+          <div className="min-h-screen bg-background relative overflow-hidden flex flex-col justify-between">
+            <div>
+              {children}
+            </div>
             <Footer />
           </div>
         </ThemeProvider>
