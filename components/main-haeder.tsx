@@ -13,28 +13,28 @@ export function Header() {
               <img
                 src="/favicon_512.png"
                 alt="ReStory Logo"
-                className="w-6 h-6 object-contain rounded-sm"
+                className="w-6 h-6 object-contain"
               />
-              <h3 className="text-lg font-black tracking-tight text-foreground">
+              <h3 className="text-lg font-medium tracking-tight text-foreground logo">
                 ReStory
               </h3>
             </div>
           </Link>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="default"
               size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/95 font-bold shadow-none rounded border-0 transition-colors"
+              className="bg-primary text-primary-foreground hover:bg-primary/95 shadow-none rounded-lg border-0 transition-colors"
               onClick={() => {
                 // Dispatch custom event to trigger main upload input
                 window.dispatchEvent(new Event("open-upload-input"))
               }}
             >
-              <Upload className="w-4 h-4 mr-1" />
+              <Upload className="w-4 h-4" />
               사진 업로드
             </Button>
-            
+
             <div className="border-l border-border pl-2">
               <ThemeToggle />
             </div>

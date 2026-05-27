@@ -14,9 +14,9 @@ export function Footer() {
               <img
                 src="/favicon_512.png"
                 alt="ReStory Logo"
-                className="w-6 h-6 object-contain rounded-sm"
+                className="w-6 h-6 object-contain"
               />
-              <h3 className="text-base font-black tracking-tight text-foreground">
+              <h3 className="text-base font-medium tracking-tight text-foreground logo">
                 ReStory
               </h3>
             </div>
@@ -80,10 +80,10 @@ export function Footer() {
         </div>
 
         {/* Divider and Copyright */}
-        <div className="border-t border-border mt-8 pt-4">
+        <div className="mt-8 pt-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-xs text-muted-foreground">
-              © 2025 ReStory by Croni. All rights reserved.
+              © {new Date().getFullYear()} ReStory by Croni. All rights reserved.
             </div>
 
             <div className="flex items-center gap-4">

@@ -60,7 +60,7 @@ export function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className={`slider-container relative aspect-square w-full select-none overflow-hidden border border-border rounded bg-muted ${className}`}
+      className={`slider-container relative w-full select-none overflow-hidden border border-border rounded bg-muted ${className}`}
       onPointerDown={handlePointerDown}
       style={{ touchAction: "none" }}
     >
@@ -68,16 +68,16 @@ export function BeforeAfterSlider({
       <img
         src={originalSrc}
         alt={originalAlt}
-        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
       />
 
-      <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-background/90 text-foreground border border-border text-xs font-semibold rounded-sm">
+      <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-background/90 text-foreground border border-border text-xs rounded-sm">
         복원 전
       </div>
 
       {/* After Image (Foreground, clipped) */}
       <div
-        className="absolute inset-0 w-full h-full pointer-events-none"
+        className="pointer-events-none"
         style={{
           clipPath: `inset(0 0 0 ${sliderPosition}%)`,
         }}
@@ -85,11 +85,11 @@ export function BeforeAfterSlider({
         <img
           src={restoredSrc}
           alt={restoredAlt}
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+          className="object-contain pointer-events-none"
         />
       </div>
 
-      <div className="absolute top-2 right-2 z-10 px-2 py-0.5 bg-primary text-primary-foreground text-xs font-semibold rounded-sm">
+      <div className="absolute top-2 right-2 z-10 px-2 py-0.5 bg-primary text-primary-foreground text-xs rounded-sm">
         복원 후
       </div>
 

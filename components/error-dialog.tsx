@@ -21,17 +21,19 @@ export function ErrorDialog({ isOpen, onClose, error, onRetry }: ErrorDialogProp
   const getErrorIcon = (type?: string) => {
     switch (type) {
       case "QUOTA_EXCEEDED":
+      case "RATE_LIMIT_HOUR_EXCEEDED":
+      case "RATE_LIMIT_DAY_EXCEEDED":
         return <Clock className="w-8 h-8 text-amber-500" />
       case "SAFETY_ERROR":
         return <Shield className="w-8 h-8 text-red-500" />
       case "NETWORK_ERROR":
-        return <Wifi className="w-8 h-8 text-blue-500" />
+        return <Wifi className="w-8 h-8 text-primary" />
       case "TIMEOUT_ERROR":
         return <Clock className="w-8 h-8 text-orange-500" />
       case "CONFIG_ERROR":
       case "AI_INIT_ERROR":
       case "AI_SERVICE_ERROR":
-        return <Server className="w-8 h-8 text-purple-500" />
+        return <Server className="w-8 h-8 text-primary" />
       default:
         return <AlertTriangle className="w-8 h-8 text-red-500" />
     }
@@ -40,9 +42,13 @@ export function ErrorDialog({ isOpen, onClose, error, onRetry }: ErrorDialogProp
   const getErrorTitle = (type?: string) => {
     switch (type) {
       case "QUOTA_EXCEEDED":
-        return "일일 사용량 초과"
+        return "사용량 초과"
+      case "RATE_LIMIT_HOUR_EXCEEDED":
+        return "단시간 복원 제한 대기"
+      case "RATE_LIMIT_DAY_EXCEEDED":
+        return "하루 복원 한도 완료"
       case "SAFETY_ERROR":
-        return "안전 정책 위배"
+        return "보안 정책 안내"
       case "NETWORK_ERROR":
         return "네트워크 오류"
       case "TIMEOUT_ERROR":
@@ -64,8 +70,12 @@ export function ErrorDialog({ isOpen, onClose, error, onRetry }: ErrorDialogProp
     switch (type) {
       case "QUOTA_EXCEEDED":
         return ["내일 다시 시도해주세요", "개인 프로젝트로 일일 사용량이 제한되어 있습니다"]
+      case "RATE_LIMIT_HOUR_EXCEEDED":
+        return ["약 1시간 동안 대기해 주세요", "한 장씩 소중히 복원하고 있사오니 잠시 휴식을 가진 후 다시 이용해 주세요"]
+      case "RATE_LIMIT_DAY_EXCEEDED":
+        return ["내일 다시 복원해 주세요", "서버 자원(GPU 크레딧) 보호를 위하여 하루 최대 10회로 제한을 두고 있습니다"]
       case "SAFETY_ERROR":
-        return ["다른 이미지를 업로드해주세요", "개인정보나 부적절한 내용이 포함된 이미지는 처리할 수 없습니다"]
+        return ["다른 사진을 업로드해 주세요", "개인정보 노출 위험이 있거나 부적절한 매체는 처리할 수 없습니다"]
       case "NETWORK_ERROR":
         return ["인터넷 연결을 확인해주세요", "잠시 후 다시 시도해주세요"]
       case "TIMEOUT_ERROR":
@@ -84,7 +94,7 @@ export function ErrorDialog({ isOpen, onClose, error, onRetry }: ErrorDialogProp
     }
   }
 
-  const canRetry = !["QUOTA_EXCEEDED", "SAFETY_ERROR", "CONFIG_ERROR"].includes(error.type || "")
+  const canRetry = !["QUOTA_EXCEEDED", "SAFETY_ERROR", "CONFIG_ERROR", "RATE_LIMIT_HOUR_EXCEEDED", "RATE_LIMIT_DAY_EXCEEDED"].includes(error.type || "")
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -104,12 +114,12 @@ export function ErrorDialog({ isOpen, onClose, error, onRetry }: ErrorDialogProp
 
         {/* Solutions */}
         <div className="px-6 pb-4">
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">해결 방법</h4>
-            <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+          <div className="bg-muted dark:bg-secondary/40 rounded-xl p-4 border border-border/30">
+            <h4 className="font-bold text-foreground mb-2">해결 방법</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
               {(error.suggestions || getErrorSolution(error.type)).map((solution, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">•</span>
+                  <span className="text-primary mt-0.5">•</span>
                   <span>{solution}</span>
                 </li>
               ))}
@@ -137,12 +147,12 @@ export function ErrorDialog({ isOpen, onClose, error, onRetry }: ErrorDialogProp
         {/* Actions */}
         <div className="px-6 pb-6 flex gap-3">
           {canRetry && onRetry && (
-            <Button onClick={onRetry} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+            <Button onClick={onRetry} className="flex-1 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold rounded-lg shadow-none">
               <RefreshCw className="w-4 h-4 mr-2" />
               다시 시도
             </Button>
           )}
-          <Button onClick={onClose} variant="outline" className={canRetry ? "flex-1" : "w-full"}>
+          <Button onClick={onClose} variant="outline" className={`${canRetry ? "flex-1" : "w-full"} hover:bg-accent rounded-lg font-semibold shadow-none border-border`}>
             확인
           </Button>
         </div>

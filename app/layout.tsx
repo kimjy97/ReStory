@@ -1,14 +1,18 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Noto_Sans_KR } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
 import { Footer } from "@/components/footer"
 
-const inter = Inter({ subsets: ["latin"] })
+const notoSansKr = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700", "900"],
+  display: "swap",
+})
 
 export const viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#5d3db5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -16,14 +20,14 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "무료 사진 복원 서비스 - AI로 옛날 사진 복원",
-  description: "AI 기술로 손상된 옛날 사진을 무료로 전문적으로 복원해드립니다",
-  keywords: ["무료사진복원", "사진복원", "AI", "이미지복원", "옛날사진", "사진수리"],
+  title: "ReStory | 무료 옛날 사진 복원 - 빛바랜 추억을 선명하게",
+  description: "빛바랜 가족사진, 먼지와 흠집으로 훼손된 옛날 사진을 고성능 AI 기술로 깨끗하고 자연스럽게 복원해 드립니다. 소중했던 순간의 기억을 선명하게 되살려보세요.",
+  keywords: ["옛날사진복원", "사진복원", "무료사진복원", "흑백사진채색", "추억복원", "훼손사진복원", "부모님사진복원", "아날로그사진복원", "ReStory"],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "사진복원",
+    title: "추억복원 ReStory",
   },
   icons: {
     icon: [
@@ -50,7 +54,7 @@ export default function RootLayout({
         <meta name="google-adsense-account" content="ca-pub-6382459265682013" />
         <meta name="google-site-verification" content="a2fgyHnx6CNoDmHMVOuzQTV4DQqn7a-WQkMF8YNLXvw" />
       </head>
-      <body className={inter.className}>
+      <body className={notoSansKr.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="min-h-screen bg-background relative overflow-hidden flex flex-col justify-between">
             <div>

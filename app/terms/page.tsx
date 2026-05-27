@@ -1,6 +1,12 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft, FileText, AlertTriangle, CheckCircle, XCircle, Scale } from "lucide-react"
 import { Header } from "@/components/sub-haeder"
+
+export const metadata: Metadata = {
+  title: "이용약관 | ReStory",
+  description: "ReStory 사진 복원 서비스의 이용규정 및 약관을 상세히 안내해 드립니다.",
+}
 
 export default function TermsOfService() {
   return (
@@ -77,7 +83,7 @@ export default function TermsOfService() {
               <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
                 <p>사용자에게 제공되는 디지털 솔루션 범위는 다음과 같습니다:</p>
                 <ul className="list-disc list-inside space-y-1.5 ml-2 font-medium">
-                  <li>Cloudflare Workers AI (SDXL) 기반 단일 프리미엄 이미지 자동 복원 처리</li>
+                  <li>인공지능(AI) 기술 기반의 옛날 사진 복원 및 자연스러운 채색 처리</li>
                   <li>복원이 완료된 고화질 결과물의 로컬 다운로드 지원</li>
                 </ul>
                 <div className="bg-muted border border-border p-4 rounded mt-4">
@@ -147,7 +153,7 @@ export default function TermsOfService() {
                 <ul className="list-disc list-inside space-y-1.5 ml-2 font-semibold text-foreground">
                   <li>일시적 서버 다운, 클라우드 호스트 이탈로 인한 복원 지연 및 정단</li>
                   <li>생성형 모델 특유의 왜곡 현상으로 결과물이 사용자의 기대를 충족하지 못하는 경우</li>
-                  <li>연동 중인 외부 3사 인프라 (Vercel 및 Cloudflare AI) 네트워크 불완전성</li>
+                  <li>연동 중인 외부 클라우드 및 인공지능 인프라 서비스의 불완전성</li>
                 </ul>
                 <div className="bg-muted border border-border p-4 rounded">
                   <p className="font-mono text-[11px] text-muted-foreground">

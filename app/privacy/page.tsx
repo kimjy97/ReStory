@@ -1,6 +1,12 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft, Shield, Eye, Lock, Database, UserCheck, AlertTriangle, Clock, Mail } from "lucide-react"
 import { Header } from "@/components/sub-haeder"
+
+export const metadata: Metadata = {
+  title: "개인정보처리방침 | ReStory",
+  description: "ReStory 사진 복원 서비스의 개인정보 처리방침을 상세히 안내해 드립니다.",
+}
 
 export default function PrivacyPolicy() {
   return (
@@ -37,7 +43,7 @@ export default function PrivacyPolicy() {
               <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
                 <p>ReStory는 다음의 목적을 위하여 개인정보를 처리합니다:</p>
                 <ul className="list-disc list-inside space-y-1.5 ml-2 font-medium">
-                  <li><strong className="text-foreground">서비스 제공:</strong> Cloudflare Workers AI 기반 사진 복원 서비스 제공</li>
+                  <li><strong className="text-foreground">서비스 제공:</strong> Replicate FLUX Kontext 및 Cloudflare Workers AI 기반 사진 복원 서비스 제공</li>
                   <li><strong className="text-foreground">서비스 개선:</strong> 비식별 통계를 통한 품질 개선 분석</li>
                   <li><strong className="text-foreground">기술 지원:</strong> 서비스 이용 중 발생하는 오류 처리 및 문의 대응</li>
                 </ul>
@@ -110,8 +116,12 @@ export default function PrivacyPolicy() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       <tr>
+                        <td className="py-2.5 px-3 font-semibold text-foreground">Replicate, Inc.</td>
+                        <td className="py-2.5 px-3">FLUX Kontext (restore-image) API를 통한 사진 복원 처리</td>
+                      </tr>
+                      <tr>
                         <td className="py-2.5 px-3 font-semibold text-foreground">Cloudflare, Inc.</td>
-                        <td className="py-2.5 px-3">Workers AI API를 통한 안정적 이미지 복원 처리</td>
+                        <td className="py-2.5 px-3">Workers AI API를 통한 안정적 이미지 복원 처리 (대체 엔진)</td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3 font-semibold text-foreground">Vercel, Inc.</td>

@@ -241,21 +241,21 @@ ReStory 문의 양식에서 자동 생성됨
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">자주 기재되는 질문</h3>
             <div className="space-y-4 divide-y divide-border text-xs leading-relaxed">
               <div className="pb-3 space-y-1">
-                <h4 className="font-bold text-foreground">Q. 이미지 자동 삭제 조건은 어떻게 되나요?</h4>
-                <p className="text-muted-foreground">
-                  서버 부하 및 보안 유지를 위하여 세션 만료 즉시 혹은 최대 24시간 이내에 생성된 파일은 백서버에서 완전 파기됩니다.
+                <h4 className="font-bold text-foreground">Q. 업로드한 사진은 안전하게 보호되나요?</h4>
+                <p className="text-muted-foreground font-medium">
+                  예, 사용자분들의 소중한 사진 정보와 프라이버시를 위하여 복원 처리가 완료되고 웹 페이지를 벗어나는 즉시 이미지 파일은 서버에서 흔적 없이 영구 파기됩니다. 안심하고 복원해 보세요.
                 </p>
               </div>
               <div className="pt-3 pb-3 space-y-1">
-                <h4 className="font-bold text-foreground">Q. 모바일 브라우저에서도 문제없이 이용이 가능한가요?</h4>
-                <p className="text-muted-foreground">
-                  예, 모바일 터치 및 스크롤을 고려해 인터랙션 슬라이더를 포함한 전체 요소가 완전한 반응형 디자인으로 설계되었습니다.
+                <h4 className="font-bold text-foreground">Q. 스마트폰에서도 복원된 사진을 볼 수 있나요?</h4>
+                <p className="text-muted-foreground font-medium">
+                  예, 스마트폰이나 태블릿 등 어떤 모바일 기기에서도 손가락 터치와 드래그를 통해 비포/애프터 사진을 손쉽게 비교하고 감상하실 수 있습니다.
                 </p>
               </div>
               <div className="pt-3 space-y-1">
                 <h4 className="font-bold text-foreground">Q. 상업적 목적으로 활용이 가능합니까?</h4>
-                <p className="text-muted-foreground">
-                  본 서비스는 비상업 포트폴리오로, 복원 퀄리티 및 가용 자원에 보증이 따르지 않으므로 개인적 소장 용도 이외의 대형 상업적 활용은 권장하지 않습니다.
+                <p className="text-muted-foreground font-medium">
+                  본 서비스는 옛 소중한 사진들과 추억을 간직하고자 하시는 분들을 위해 개인 개발자가 비상업 목적으로 제공하는 공간입니다. 소중한 개인 소장용 외의 대규모 상업 행위는 권장하지 않습니다.
                 </p>
               </div>
             </div>

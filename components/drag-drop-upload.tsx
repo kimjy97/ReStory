@@ -78,13 +78,12 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
 
   return (
     <div
-      className={`border-2 border-dashed rounded p-10 text-center cursor-pointer transition-colors duration-200 select-none ${
-        isDragging
-          ? "border-primary bg-accent"
-          : dragError
+      className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors duration-200 select-none ${isDragging
+        ? "border-primary bg-accent"
+        : dragError
           ? "border-destructive bg-destructive/10"
           : "border-border hover:border-primary hover:bg-accent"
-      }`}
+        }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -101,18 +100,17 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
       <div className="space-y-4">
         <div className="mx-auto w-12 h-12 flex items-center justify-center">
           <div
-            className={`w-full h-full rounded flex items-center justify-center transition-colors duration-200 ${
-              dragError
-                ? "bg-destructive text-destructive-foreground"
-                : isDragging
+            className={`w-full h-full rounded-xl flex items-center justify-center transition-colors duration-200 ${dragError
+              ? "bg-destructive text-destructive-foreground"
+              : isDragging
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-foreground"
-            }`}
+              }`}
           >
             {dragError || isDragging ? (
-              <Upload className="w-5 h-5" />
+              <Upload className="w-7 h-7" strokeWidth={1.5} />
             ) : (
-              <Camera className="w-5 h-5" />
+              <Camera className="w-7 h-7" strokeWidth={1.5} />
             )}
           </div>
         </div>
@@ -122,7 +120,7 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
             <p className="text-destructive font-semibold text-sm">{dragError}</p>
           ) : (
             <>
-              <p className="text-base font-bold text-foreground">
+              <p className="text-base font-semibold text-foreground">
                 {isDragging ? "이미지를 여기에 놓으세요" : "사진을 여기에 업로드하세요"}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -134,9 +132,9 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
 
         {!dragError && (
           <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground pt-2">
-            <span className="px-1.5 py-0.5 border border-border rounded-sm uppercase font-mono">JPG</span>
-            <span className="px-1.5 py-0.5 border border-border rounded-sm uppercase font-mono">PNG</span>
-            <span className="px-1.5 py-0.5 border border-border rounded-sm uppercase font-mono">MAX 10MB</span>
+            <span className="px-1.5 py-0.5 border border-border rounded-sm uppercase font-mono bg-background text-muted-foreground">JPG</span>
+            <span className="px-1.5 py-0.5 border border-border rounded-sm uppercase font-mono bg-background text-muted-foreground">PNG</span>
+            <span className="px-1.5 py-0.5 border border-border rounded-sm uppercase font-mono bg-background text-muted-foreground">MAX 10MB</span>
           </div>
         )}
       </div>
