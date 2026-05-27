@@ -19,15 +19,49 @@
 
 * **Frontend**: Next.js, React, TypeScript, TailwindCSS
 * **UI 라이브러리**: Radix UI
-* **AI 모델 연동**: Google Gemini API
+* **AI 모델 연동**: Replicate API (Cloudflare Workers AI fallback)
+* **이미지 처리**: Sharp
+* **데이터베이스**: MongoDB (Mongoose)
 * **배포**: Vercel
 
 ## 💡 핵심 기능 설명
 
+### 🔄 사진 복원 파이프라인
+
+1. **이미지 업로드 및 검증**
+   - Drag & Drop 또는 파일 선택으로 이미지 업로드
+   - 파일 타입(JPG/PNG) 및 크기(최대 10MB) 검증
+   - 개발 모드 시뮬레이션 (USE_REAL_AI_IN_DEV=true로 실제 AI 테스트 가능)
+
+2. **Rate Limiting**
+   - IP 기반 요청 제한으로 서버 부하 방지
+   - MongoDB에 요청 로그 저장 및 관리
+
+3. **AI 복원 엔진 선택**
+   - **1순위**: Replicate FLUX Kontext 모델 (고화질 복원)
+     - 동적으로 최신 모델 버전 해시 획득
+     - 예측 생성 및 상태 폴링 (최대 40초)
+     - 성공 시 고화질 복원 이미지 반환
+   - **2순위 (Fallback)**: Cloudflare Workers AI (무료 대체)
+     - Stable Diffusion v1.5 Img2Img 모델 사용
+     - 부드러운 아날로그 감성 복원
+   - **실패 시**: 에러 메시지 및 재시도 안내
+
+4. **이미지 후처리**
+   - Sharp를 이용한 이미지 포맷 변환
+   - 저해상도 이미지 자동 업스케일링 (개발 모드)
+   - Base64 인코딩하여 프론트엔드 전송
+
+5. **결과 반환**
+   - 복원된 이미지 데이터 (Base64)
+   - 사용된 엔진 정보
+   - 복원 스타일 및 설명
+
 ### AI 사진 복원 시스템
 
-* Google Gemini Vision 모델을 활용한 외부 추론 기반 복원
-* 복원 스타일별 프롬프트 구성: 보수적/모던/하이브리드 선택 제공
+* Replicate API를 활용한 AI 기반 사진 복원 (Cloudflare Workers AI fallback 지원)
+* Sharp를 이용한 이미지 처리 및 고화질 업스케일링
+* Rate Limiting 기능으로 서버 부하 방지
 * 고해상도 이미지 지원 (서버 부하 제한을 위한 10MB 제한 적용)
 
 ### 직관적인 이미지 관리
