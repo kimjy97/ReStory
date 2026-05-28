@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Noto_Sans_KR } from "next/font/google"
+import { GoogleAnalytics } from "@next/third-parties/google"
 import './globals.css'
 import { ThemeProvider } from "next-themes"
 import { Footer } from "@/components/footer"
@@ -22,12 +23,12 @@ export const viewport = {
 export const metadata: Metadata = {
   title: "ReStory | 무료 옛날 사진 복원 - 빛바랜 추억을 선명하게",
   description: "빛바랜 가족사진, 먼지와 흠집으로 훼손된 옛날 사진을 고성능 AI 기술로 깨끗하고 자연스럽게 복원해 드립니다. 소중했던 순간의 기억을 선명하게 되살려보세요.",
-  keywords: ["옛날사진복원", "사진복원", "무료사진복원", "흑백사진채색", "추억복원", "훼손사진복원", "부모님사진복원", "아날로그사진복원", "ReStory"],
+  keywords: ["옛날사진복원", "사진복원", "무료사진복원", "흑백사진채색", "추억복원", "훼손사진복원", "부모님사진복원", "아날로그사진복원", "ReStory", "리스토리"],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "추억복원 ReStory",
+    title: "ReStory",
   },
   icons: {
     icon: [
@@ -63,6 +64,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </ThemeProvider>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       </body>
     </html>
   )
