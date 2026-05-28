@@ -4,36 +4,36 @@
 
 @layer base {
   :root {
-    --background: 260 30% 98%;    /* Soft lilac off-white, warm and welcoming */
-    --foreground: 260 40% 12%;    /* Deep indigo charcoal, highly legible and premium */
-    --card: 0 0% 100%;            /* Clean white canvas cards */
+    --background: 260 30% 98%; /* Soft lilac off-white, warm and welcoming */
+    --foreground: 260 40% 12%; /* Deep indigo charcoal, highly legible and premium */
+    --card: 0 0% 100%; /* Clean white canvas cards */
     --card-foreground: 260 40% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 260 40% 12%;
-    --primary: 260 65% 48%;       /* Sophisticated royal indigo accent - matches logo blue-indigo */
+    --primary: 260 65% 48%; /* Sophisticated royal indigo accent - matches logo blue-indigo */
     --primary-foreground: 0 0% 100%;
-    --secondary: 260 25% 94%;     /* Soft lilac grey for secondary containers */
+    --secondary: 260 25% 94%; /* Soft lilac grey for secondary containers */
     --secondary-foreground: 260 40% 12%;
     --muted: 260 25% 94%;
     --muted-foreground: 260 12% 48%; /* Soft slate-lavender text for descriptions */
-    --accent: 260 25% 91%;        /* Light warm lavender accent */
+    --accent: 260 25% 91%; /* Light warm lavender accent */
     --accent-foreground: 260 40% 12%;
     --destructive: 0 74.2% 42.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 260 20% 91%;        /* Soft lilac-gray border lines */
+    --border: 260 20% 91%; /* Soft lilac-gray border lines */
     --input: 260 20% 88%;
     --ring: 260 65% 48%;
-    --radius: 0.75rem;            /* Softer organic corner radius */
+    --radius: 0.75rem; /* Softer organic corner radius */
   }
 
   .dark {
-    --background: 260 25% 8%;     /* Deep midnight-indigo dark canvas */
-    --foreground: 260 25% 93%;    /* Gentle warm lavender-white text */
-    --card: 260 20% 12%;          /* Slightly lighter dark indigo card block */
+    --background: 260 25% 8%; /* Deep midnight-indigo dark canvas */
+    --foreground: 260 25% 93%; /* Gentle warm lavender-white text */
+    --card: 260 20% 12%; /* Slightly lighter dark indigo card block */
     --card-foreground: 260 25% 93%;
     --popover: 260 20% 12%;
     --popover-foreground: 260 25% 93%;
-    --primary: 260 75% 72%;       /* Soft glowing lavender/lilac - matches logo purple-pink */
+    --primary: 260 75% 72%; /* Soft glowing lavender/lilac - matches logo purple-pink */
     --primary-foreground: 260 25% 8%;
     --secondary: 260 15% 15%;
     --secondary-foreground: 260 25% 93%;
@@ -43,7 +43,7 @@
     --accent-foreground: 260 25% 93%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 260 15% 18%;        /* Subtle dark lavender border lines */
+    --border: 260 15% 24%; /* Subtle dark lavender border lines */
     --input: 260 15% 18%;
     --ring: 260 75% 72%;
   }
@@ -64,23 +64,23 @@
    ========================================================================== */
 
 /* 1. Eliminate all shadows */
-.shadow-sm, 
-.shadow, 
-.shadow-md, 
-.shadow-lg, 
-.shadow-xl, 
-.shadow-2xl, 
+.shadow-sm,
+.shadow,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl,
 .shadow-inner,
 [class*="shadow-"] {
   box-shadow: none !important;
 }
 
 /* 2. Eliminate all background blurs and ambient glow filter effects */
-.blur-3xl, 
-.blur-2xl, 
-.blur-xl, 
-.blur-lg, 
-.blur-md, 
+.blur-3xl,
+.blur-2xl,
+.blur-xl,
+.blur-lg,
+.blur-md,
 .blur-sm,
 [class*="blur-"] {
   filter: none !important;
@@ -88,10 +88,10 @@
 }
 
 /* 3. Eliminate backdrop-blurs completely */
-.backdrop-blur-xl, 
-.backdrop-blur-lg, 
-.backdrop-blur-md, 
-.backdrop-blur-sm, 
+.backdrop-blur-xl,
+.backdrop-blur-lg,
+.backdrop-blur-md,
+.backdrop-blur-sm,
 .backdrop-blur,
 [class*="backdrop-blur-"] {
   backdrop-filter: none !important;
@@ -110,20 +110,8 @@
   user-select: none;
 }
 
-.slider-handle {
-  width: 32px;
-  height: 32px;
-  background-color: hsl(var(--primary));
-  border: 2px solid hsl(var(--background));
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  cursor: ew-resize;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 30;
+.slider-handler {
+  backdrop-filter: blur(4px);
 }
 
 .slider-line {
@@ -137,5 +125,5 @@
 }
 
 .logo {
-  text-box: trim-both alphabetic;
+  text-box: trim-both cap alphabetic;
 }

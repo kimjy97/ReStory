@@ -5,17 +5,17 @@ import { Upload } from "lucide-react"
 
 export function Header() {
   return (
-    <header className="h-[56px] flex items-center border-b border-border bg-background relative z-50">
-      <div className="container mx-auto px-4">
+    <header className="h-[56px] flex items-center relative z-50">
+      <div className="container mx-auto px-3 md:px-4">
         <div className="flex items-center justify-between">
           <Link href="/">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <img
                 src="/favicon_512.png"
                 alt="ReStory Logo"
-                className="w-6 h-6 object-contain"
+                className="w-7 h-7 object-contain"
               />
-              <h3 className="text-lg font-medium tracking-tight text-foreground logo">
+              <h3 className="text-xl font-medium tracking-tight text-foreground logo">
                 ReStory
               </h3>
             </div>
@@ -35,9 +35,7 @@ export function Header() {
               사진 업로드
             </Button>
 
-            <div className="border-l border-border pl-2">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </div>

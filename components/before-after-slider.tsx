@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { ChevronsLeftRight } from "lucide-react"
+import { SliderHandle } from "@/components/ui/slider-handle"
 
 interface BeforeAfterSliderProps {
   originalSrc: string
@@ -60,7 +60,7 @@ export function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className={`slider-container relative w-full select-none overflow-hidden border border-border rounded bg-muted ${className}`}
+      className={`slider-container relative w-full select-none overflow-hidden border border-border rounded bg-muted cursor-ew-resize ${className}`}
       onPointerDown={handlePointerDown}
       style={{ touchAction: "none" }}
     >
@@ -100,12 +100,10 @@ export function BeforeAfterSlider({
       />
 
       {/* Slider Handle */}
-      <div
-        className="slider-handle shadow-none"
+      <SliderHandle
+        size="md"
         style={{ left: `${sliderPosition}%` }}
-      >
-        <ChevronsLeftRight className="w-4 h-4 text-primary-foreground pointer-events-none" />
-      </div>
+      />
     </div>
   )
 }

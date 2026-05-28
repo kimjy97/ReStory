@@ -217,8 +217,34 @@ export async function POST(req: Request) {
     }
 
     // Convert file to base64 data URI
-    const bytes = await file.arrayBuffer()
-    const base64 = Buffer.from(bytes).toString("base64")
+    const originalBytes = await file.arrayBuffer()
+
+    // 서버사이드 이미지 리사이즈 안전장치: 2560px 초과 시 리사이즈
+    let imageBody: any = Buffer.from(originalBytes)
+    try {
+      const sharpInstance = sharp(imageBody)
+      const metadata = await sharpInstance.metadata()
+      const { width = 0, height = 0 } = metadata
+      const MAX_DIMENSION = 2560
+
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        const resizedBuffer = await sharpInstance
+          .resize({
+            width: Math.min(width, MAX_DIMENSION),
+            height: Math.min(height, MAX_DIMENSION),
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .png()
+          .toBuffer()
+        imageBody = Buffer.from(resizedBuffer)
+        logger.info(`서버 사이드 리사이즈 수행: ${width}x${height} → 최대 ${MAX_DIMENSION}px`)
+      }
+    } catch (sharpErr) {
+      logger.warn("서버 이미지 리사이즈 중 오류, 원본 유지:", sharpErr as Error)
+    }
+
+    const base64 = imageBody.toString("base64")
     const inputDataUrl = `data:${file.type};base64,${base64}`
 
     // Core Decision: If Replicate Token exists, try the Premium FLUX Kontext Model

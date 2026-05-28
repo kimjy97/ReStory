@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Wand2, Download, RefreshCw, CheckCircle2, ChevronRight, AlertTriangle } from "lucide-react"
+import { Wand2, Download, RefreshCw, CheckCircle2, ChevronRight, AlertTriangle, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DragDropUpload } from "@/components/drag-drop-upload"
 import { ErrorDialog } from "@/components/error-dialog"
 import { Header } from "@/components/main-haeder"
 import { BeforeAfterSlider } from "@/components/before-after-slider"
+import { FeaturedCase } from "@/components/featured-case"
+import { GalleryGrid } from "@/components/gallery-grid"
 
 interface RestoredImage {
   data: string
@@ -145,42 +147,52 @@ export default function PhotoRestoration() {
   }
 
   return (
-    <div className="relative">
-      <Header />
+    <div className="relative min-h-screen">
+      {/* Full-screen background image with bottom fade */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-no-repeat bg-cover bg-[15%_-55vw]"
+          style={{ backgroundImage: "url(/bg2.jpg)" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/85 via-0% to-transparent to-25%" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background via-55% to-transparent to-95%" />
+      </div>
 
-      <main className="container mx-auto px-4 py-10 max-w-4xl relative z-10 select-none">
+      <Header />
+      <main className="container flex flex-col items-center mx-auto px-3 sm:px-4 py-6 md:py-14 max-w-6xl relative select-none">
         {/* Flat Minimal Hero Section */}
-        <div className="text-center py-10 mb-6">
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground mb-3">
+        <div className="text-center py-10 mb-2 md:mb-10">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-blue-950 dark:text-lime-200 mb-5">
             빛바랜 기억을 다시 선명하게
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            소중한 가족의 옛날 사진, 어릴 적 소중한 추억이 담긴 아날로그 사진을 선명하고 자연스럽게 복원해 드립니다. 먼지와 얼룩, 흠집은 지우고 잃어버린 생기를 다시 채워보세요.
+          <p className="text-sm sm:text-lg font-medium text-foreground dark:text-foreground max-w-4xl mx-auto tracking-tight leading-relaxed break-keep">
+            소중한 가족의 옛날 사진, 어릴 적 소중한 추억이 담긴 아날로그 사진을 선명하고 자연스럽게 복원해 드립니다.<br></br>먼지와 얼룩, 흠집은 지우고 잃어버린 생기를 다시 채워보세요.
           </p>
         </div>
 
-        <div className="space-y-8">
+        {/* Gallery Grid - More restoration cases below upload */}
+        <div className="w-full mb-24">
+          <GalleryGrid />
+        </div>
+
+        <div className="flex flex-col items-center mb-20">
+          <p className="text-xl mb-6 text-foreground">사진 복원 시작하기</p>
+          <ChevronDown className="size-14 animate-bounce text-foreground/20" strokeWidth={1} />
+        </div>
+
+        <div className="w-full space-y-12">
+
           {/* 1. Upload View */}
           {!originalImage && (
-            <div className="bg-card border border-border/80 dark:border-border/40 rounded-2xl p-8 shadow-none">
-              <h3 className="text-sm font-bold text-foreground uppercase mb-5 tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 bg-primary rounded-full"></span>
-                복원할 사진 선택하기
-              </h3>
-              <DragDropUpload onFileSelected={handleFileSelected} />
-            </div>
+            <DragDropUpload onFileSelected={handleFileSelected} />
           )}
 
           {/* 2. Restoration Console View */}
           {originalImage && !restoredImage && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               {/* Original Preview */}
-              <div className="bg-card rounded-2xl p-6 space-y-4 border border-border/30">
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  선택한 원본 사진
-                </h3>
-                <div className="aspect-square bg-muted/50 rounded-xl overflow-hidden border border-border/20">
+              <div>
+                <div className="aspect-square bg-black rounded-xl overflow-hidden border border-border/20">
                   <img
                     src={originalImage}
                     alt="Original Uploaded"
@@ -191,24 +203,20 @@ export default function PhotoRestoration() {
                   <Button
                     variant="outline"
                     onClick={handleReset}
-                    className="w-full border-border hover:bg-accent text-xs font-semibold rounded-lg shadow-none"
+                    className="w-full py-5 mt-4 border-border hover:bg-accent text-sm font-medium rounded-lg shadow-none flex items-center gap-1.5"
                   >
+                    <RefreshCw className="w-4 h-4" />
                     사진 교체하기
                   </Button>
                 )}
               </div>
 
               {/* Processing Console */}
-              <div className="bg-card rounded-2xl p-6 space-y-6 border border-border/30">
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  추억 복원 시작
-                </h3>
-
+              <div className="flex flex-col gap-6 md:p-6 justify-center h-full md:border border-border rounded-xl">
                 {isRestoring ? (
                   <div className="space-y-4">
                     {/* Flat simulated checklist log */}
-                    <div className="rounded-xl bg-muted/60 p-5 space-y-3 font-sans text-xs leading-relaxed border border-border/20">
+                    <div className="space-y-3 font-sans text-sm leading-relaxed">
                       {restorationSteps.map((step, idx) => {
                         const isDone = idx < currentStepIndex
                         const isCurrent = idx === currentStepIndex
@@ -217,10 +225,10 @@ export default function PhotoRestoration() {
                           <div
                             key={idx}
                             className={`flex items-center gap-2.5 ${isDone
-                              ? "text-primary font-semibold"
+                              ? "text-primary font-medium"
                               : isCurrent
-                                ? "text-foreground font-bold animate-pulse"
-                                : "text-muted-foreground/40"
+                                ? "text-foreground font-medium animate-pulse"
+                                : "text-muted-foreground/50"
                               }`}
                           >
                             {isDone ? (
@@ -235,12 +243,12 @@ export default function PhotoRestoration() {
                     </div>
 
                     {/* Simple flat loading indicator */}
-                    <div className="space-y-1.5 pt-2">
-                      <div className="flex justify-between text-xs font-semibold text-muted-foreground">
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between text-sm text-muted-foreground">
                         <span>추억을 되살리는 중...</span>
                         <span>{progress}%</span>
                       </div>
-                      <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-secondary rounded-full h-7 overflow-hidden">
                         <div
                           className="bg-primary h-full transition-all duration-300 rounded-full"
                           style={{ width: `${progress}%` }}
@@ -249,12 +257,12 @@ export default function PhotoRestoration() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="p-5 bg-muted/60 rounded-xl text-xs text-muted-foreground leading-relaxed border border-border/20">
-                      <p className="font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                        추억 복원 안내사항
+                  <div className="flex flex-col items-center space-y-6">
+                    <div className="text-center text-muted-foreground leading-relaxed">
+                      <p className="text-lg font-medium text-foreground mb-2 flex items-center justify-center gap-1.5">
+                        사진 복원 안내사항
                       </p>
-                      <ul className="list-disc list-inside space-y-1.5 ml-1">
+                      <ul className="list-inside space-y-1 font-thin text-sm md:text-base">
                         <li>사진 속 흠집, 먼지, 얼룩을 깨끗하게 지워드립니다.</li>
                         <li>빛이 바래고 흐릿해진 얼굴 선과 배경을 선명하게 다듬어 드립니다.</li>
                         <li>흑백 사진은 따뜻하고 자연스러운 색감으로 채색되어 되살아납니다.</li>
@@ -263,73 +271,73 @@ export default function PhotoRestoration() {
 
                     <Button
                       onClick={handleRestore}
-                      className="w-full bg-primary text-primary-foreground hover:bg-primary/95 py-3.5 rounded-xl shadow-none border-0 transition-colors"
+                      className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/95 py-6 px-6 rounded-xl shadow-none border-0 transition-colors"
                     >
                       <Wand2 className="w-4 h-4" />
-                      추억 복원 시작하기
+                      사진 복원 시작하기
                     </Button>
                   </div>
                 )}
               </div>
             </div>
           )}
-
-          {/* 3. Success Results View */}
-          {originalImage && restoredImage && (
-            <div className="bg-card border border-border/30 rounded-2xl p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 gap-4">
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  복원 완료
-                </h3>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleReset}
-                    className="border-border hover:bg-accent hover:text-foreground text-xs rounded-lg shadow-none flex items-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    새로운 사진 선택
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={downloadImage}
-                    className="bg-primary text-primary-foreground hover:bg-primary/95 text-xs rounded-lg shadow-none flex items-center gap-1.5"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    결과 고화질 다운로드
-                  </Button>
-                </div>
+        </div>
+        {/* 3. Success Results View */}
+        {originalImage && restoredImage && (
+          <div className="max-w-2xl self-center rounded-2xl sm:p-8 animate-in fade-in duration-300">
+            {/* Warning alert if fallback occurred */}
+            {warningMessage && (
+              <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-lg flex items-start gap-2 max-w-2xl mx-auto leading-relaxed">
+                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>{warningMessage}</span>
               </div>
+            )}
 
-              {/* Warning alert if fallback occurred */}
-              {warningMessage && (
-                <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-lg flex items-start gap-2 max-w-2xl mx-auto leading-relaxed">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>{warningMessage}</span>
-                </div>
-              )}
+            <div className="text-2xl text-center font-medium tracking-wider mb-2 fade-in animate-in slide-in-from-bottom">복원이 완료되었습니다!</div>
 
-              {/* High-fidelity interactive flat slider */}
-              <div className="max-w-2xl mx-auto">
-                <BeforeAfterSlider
-                  originalSrc={originalImage}
-                  restoredSrc={`data:${restoredImage.mimeType};base64,${restoredImage.data}`}
-                  className="rounded-2xl overflow-hidden border border-border/30"
-                />
-                <p className="text-center text-xs text-muted-foreground mt-3 py-4 uppercase">
-                  슬라이더를 좌우로 드래그하여 상세 복원 디테일을 비교하세요
-                </p>
-              </div>
-
-              {/* Warm Nostalgic Note Card */}
-              <div className="max-w-2xl mx-auto p-6 bg-muted/60 border border-border/20 rounded-2xl text-center text-xs text-muted-foreground leading-relaxed space-y-1">
-                <p className="text-foreground font-bold font-sans">추억을 나누어 보세요</p>
-                <p className="font-sans">소중한 가족과 지인분들에게 선명하게 복원된 사진을 선물하고 따뜻했던 순간의 기억을 함께 나누어 보세요.</p>
-              </div>
+            {/* High-fidelity interactive flat slider */}
+            <div className="mx-auto">
+              <p className="text-center text-sm md:text-base text-foreground/70 py-4 font-thin">
+                슬라이더를 좌우로 드래그하여 복원 전후를 비교해보세요
+              </p>
+              <BeforeAfterSlider
+                originalSrc={originalImage}
+                restoredSrc={`data:${restoredImage.mimeType};base64,${restoredImage.data}`}
+                className="rounded-2xl overflow-hidden border border-border/30"
+              />
             </div>
-          )}
+
+            <div className="flex flex-row gap-2 py-4">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleReset}
+                className="flex-1 border-border hover:bg-accent hover:text-foreground text-sm rounded-lg shadow-none flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-4 h-4" />
+                새로운 사진 선택
+              </Button>
+              <Button
+                size="lg"
+                onClick={downloadImage}
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 text-sm rounded-lg shadow-none flex items-center gap-1.5"
+              >
+                <Download className="w-4 h-4" />
+                복원 사진 다운로드
+              </Button>
+            </div>
+
+            {/* Warm Nostalgic Note Card */}
+          </div>
+        )}
+        <div className="flex flex-col items-center gap-5 py-32">
+          <div className="w-1.5 h-1.5 bg-foreground/20 rounded-full" />
+          <div className="w-1.5 h-1.5 bg-foreground/20 rounded-full" />
+          <div className="w-1.5 h-1.5 bg-foreground/20 rounded-full" />
+        </div>
+        <div className="mx-auto px-4 max-w-xl text-center text-base text-muted-foreground leading-relaxed space-y-1 break-keep">
+          <p className="text-foreground text-base md:text-lg font-bold font-sans tracking-wider">복원된 사진으로 추억을 나누어 보세요</p>
+          <p className="font-sans text-sm md:text-base tracking-wider">소중한 가족과 지인분들에게 선명하게 복원된 사진을 선물하고 따뜻했던 순간의 기억을 함께 나누어 보세요.</p>
         </div>
       </main>
 

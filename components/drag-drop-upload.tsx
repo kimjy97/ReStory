@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react"
 import { Upload, Camera } from "lucide-react"
+import { resizeImage } from "@/lib/resize-image"
 
 interface DragDropUploadProps {
   onFileSelected: (file: File) => void
@@ -9,6 +10,7 @@ interface DragDropUploadProps {
 export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragError, setDragError] = useState<string | null>(null)
+  const [isResizing, setIsResizing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Trigger file input click from global event
@@ -55,7 +57,7 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
     }
   }
 
-  const validateAndProcessFile = (file: File) => {
+  const validateAndProcessFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setDragError("이미지 파일만 업로드 가능합니다.")
       return
@@ -67,18 +69,38 @@ export function DragDropUpload({ onFileSelected }: DragDropUploadProps) {
     }
 
     setDragError(null)
-    onFileSelected(file)
+    setIsResizing(true)
+
+    try {
+      // 클라이언트에서 이미지 리사이즈 수행 (2048px 제한, 품질 85%)
+      const resizedFile = await resizeImage(file, {
+        maxWidth: 2048,
+        maxHeight: 2048,
+        quality: 0.85,
+      })
+
+      const originalSize = (file.size / 1024 / 1024).toFixed(2)
+      const resizedSize = (resizedFile.size / 1024 / 1024).toFixed(2)
+      console.log(`[리사이즈] ${originalSize}MB → ${resizedSize}MB`)
+
+      onFileSelected(resizedFile)
+    } catch (err) {
+      console.error("이미지 리사이즈 실패, 원본 파일을 사용합니다:", err)
+      onFileSelected(file)
+    } finally {
+      setIsResizing(false)
+    }
   }
 
   const handleCardClick = () => {
-    if (fileInputRef.current) {
+    if (!isResizing && fileInputRef.current) {
       fileInputRef.current.click()
     }
   }
 
   return (
     <div
-      className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors duration-200 select-none ${isDragging
+      className={`border-[3px] border-dashed rounded-2xl px-10 py-28 text-center cursor-pointer transition-colors duration-200 select-none ${isDragging
         ? "border-primary bg-accent"
         : dragError
           ? "border-destructive bg-destructive/10"

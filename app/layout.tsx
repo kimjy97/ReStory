@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Noto_Sans_KR } from "next/font/google"
-import "./globals.css"
+import './globals.css'
 import { ThemeProvider } from "next-themes"
 import { Footer } from "@/components/footer"
 
@@ -56,7 +56,7 @@ export default function RootLayout({
       </head>
       <body className={notoSansKr.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="min-h-screen bg-background relative overflow-hidden flex flex-col justify-between">
+          <div className="min-h-screen bg-background relative flex flex-col justify-between">
             <div>
               {children}
             </div>
